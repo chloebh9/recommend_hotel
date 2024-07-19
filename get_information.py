@@ -5,8 +5,11 @@ import requests
 import json
 
 def get_information(submit_json):
-  csv_file = "./data/cleaned_top_200_rows.csv"
-
+  csv_file = "/root/LLM_Bootcamp/Project3/cleaned_top_200_rows.csv"
+  
+  # JSON 객체를 문자열로 변환
+  submit_json = json.dumps(submit_json)
+    
   def get_img(keyword):
     base_url = "http://apis.data.go.kr/B551011/KorService1/searchKeyword1"
     api_key = os.getenv("DATA_API_KEY")   # .env 파일에 각자 API 추가
@@ -77,7 +80,7 @@ def get_information(submit_json):
           hotel_info["img"] = hotel_img
           result.append(hotel_info)
       
-    result = json.dumps(result, indent=4, ensure_ascii=False)
+    result = json.dump(result, indent=4, ensure_ascii=False)
         
     return result
   
@@ -85,12 +88,12 @@ def get_information(submit_json):
   return result
 
 if __name__ == "__main__":
-  load_dotenv()  # 환경 변수 로드
+  load_dotenv()  # .env 파일에서 환경 변수 로드
   
   csv_file = "/root/LLM_Bootcamp/Project3/cleaned_top_200_rows.csv"
   ans_json = '{"introduction" : "asdf", "hotel_id" : ["백년한옥", "엘리스호텔"]}' # 예시(json으로 받아온거)
 
-  result = get_information()
+  result = get_information(ans_json)
   
   if result:
       print(result)
