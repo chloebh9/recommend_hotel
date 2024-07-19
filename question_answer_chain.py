@@ -11,6 +11,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_history_aware_retriever
 from dotenv import load_dotenv
+import json
 import os
 
 from langchain_core.pydantic_v1 import BaseModel, Field
@@ -62,7 +63,9 @@ def init_chain(retriever):
     As an experienced hotel reviewer, carefully evaluate the provided hotel descriptions and information.
     Based on your analysis, recommend the top 3 hotels, providing detailed reasons for your choices, such as amenities, location, customer reviews, and overall value. 
     Ensure each recommendation is clearly justified.
-    Answer for the question in Korean using the following format.\n{format_instructions}
+    Answer for the question in Korean using the following format.
+    Do not output strings.\n{format_instructions}
+    Delete the keyword json from the output.
     
     Hotel information: 
     {context} """.strip()
@@ -74,7 +77,7 @@ def init_chain(retriever):
             MessagesPlaceholder("chat_history"),
             ("human", "{input}"),
         ]
-    ).partial(format_instructions=output_parser.get_format_instructions())
+    ).partial(format_instructions=JsonOutputParser(pydantic_object=Hotel).get_format_instructions())
 
     question_answer_chain = create_stuff_documents_chain(azure_model, qa_prompt_template)
     rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
@@ -114,28 +117,41 @@ def ask_something(chain, query):
     )
 
     print(f"LLM : {chain_output}")
-    return
+    return chain_output
 
 
-if __name__ == "__main__":
+def model(query):
     load_dotenv()  # .env 파일에서 환경 변수 로드
 
-    filepath = "/root/LLM_Bootcamp/exercise_3/data/cleaned_top_200_rows (1).txt"
+    filepath = "/root/LLM_Bootcamp/LangChain_Class/exercise_33/data/cleaned_top_200_rows.txt" ##### 경로에 맞게 고쳐야 될 부분.
 
     # 리트리버 초기화
     retriever = init_retriver(filepath)
     # 체인 초기화
     rag_chain  = init_chain(retriever)
+    return json.loads(ask_something(rag_chain, query))
+    
 
-    # 사용자 입력 목록
-    human_inputs = [
-        "서울에서 지낼만 한 호텔 추천해줘.",
-        "주변에 놀 곳이 많으면 좋을 겠어.",
-    ]
+if __name__ == "__main__":
+    print(type(model("서울에서 지낼만 한 호텔 추천해줘.")))
+    # load_dotenv()  # .env 파일에서 환경 변수 로드
 
-    # 각 사용자 입력에 대해 질문
-    for input in human_inputs:
-        ask_something(rag_chain, input)
+    # filepath = "/root/LLM_Bootcamp/LangChain_Class/exercise_33/data/cleaned_top_200_rows.txt" ##### 경로에 맞게 고쳐야 될 부분.
+
+    # # 리트리버 초기화
+    # retriever = init_retriver(filepath)
+    # # 체인 초기화
+    # rag_chain  = init_chain(retriever)
+
+    # # 사용자 입력 목록
+    # human_inputs = [
+    #     "서울에서 지낼만 한 호텔 추천해줘.",
+    #     "주변에 놀 곳이 많으면 좋을 겠어.",
+    # ]
+
+    # # 각 사용자 입력에 대해 질문
+    # for input in human_inputs:
+    #     ask_something(rag_chain, input)
 
 # result
 """
