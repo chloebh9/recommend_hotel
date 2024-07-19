@@ -4,6 +4,10 @@ import json
 import requests
 from PIL import Image
 from io import BytesIO
+from question_answer_chain import model
+from get_information import get_information
+from reply_json import get_json
+
 
 def show_details(user):
     with col2:
@@ -94,7 +98,7 @@ st.markdown(
         font-style: normal;
         font-weight: 700;
         font-size: 16px;
-        line-height: 4px;
+        line-height: 1px;
         color: #EDEDED;
     }
 
@@ -121,7 +125,7 @@ st.markdown(
         bottom: 10px;
         right: 10px;
     }
-    
+    </style>
     """,
     unsafe_allow_html=True
 )
@@ -129,30 +133,35 @@ st.markdown(
 # 중앙 정렬을 위한 컨테이너
 st.markdown('<div class="search-container">', unsafe_allow_html=True)
 search_term = st.text_input('', placeholder='다음과 같이 입력해 보세요! "바다가 보이는 호텔을 추천해줘."', key='search_input')
+data =''
+if search_term:
+    data = json.loads(get_json(search_term))
 st.markdown('</div>', unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 
 with col1:
     if search_term:
     # 예시로 숙박 정보를 가져오는 API 호출
-        with open("/root/LLM_Bootcamp/exercise_3/test.json", "r") as json_file:
-            data = json.load(json_file)
-            # 결과 표시
-            st.markdown('<div class="search-results">', unsafe_allow_html=True)
-            for i, user in enumerate(data["users"][:5]):
-                result_item = f'''
-                    <div class="result-item">
-                        <h3 class="title">{user["firstName"]} {user["lastName"]}</h3>
-                        <p class="label">전화번호: {user["phoneNumber"]}</p>
-                        <p class="label">이메일: {user.get("emailAddress", "")}</p>
-                        <a href="{user["homepage"]}" class="top-right-btn" target="_blank">사이트 이동</a>
-                        <a class="bottom-right-btn" target="_blank">상세 정보</a>
-                        <button class="bottom-right-btn">상세 정보</button>
-                    </div>
-                '''
-                st.markdown(result_item, unsafe_allow_html=True)
+        #data = json.load(json_file)
+        # 결과 표시
+        st.markdown('<div class="search-results">', unsafe_allow_html=True)
+        for i, hotel in enumerate(data):
+            result_item = f'''
+                <div class="result-item">
+                    <h3 class="title">{hotel["명칭"]}</h3>
+                    <p class="label">전화번호: {hotel["전화번호"]}</p>
+                    <p class="label">주소: {hotel["주소"]}</p>
+                    <p class="label">개요: {hotel["개요"][:24] + "...."}</p>
+                    <p class="label">객실 수: {hotel["객실 수"]}</p>
+                    <p class="label">부대 시설: {hotel["부대 시설"]}</p>
+                    <a href="{hotel["url"]}" class="top-right-btn" target="_blank">사이트 이동</a>
+                    <a class="bottom-right-btn" target="_blank">상세 정보</a>
+                    <button class="bottom-right-btn">상세 정보</button>
+                </div>
+            '''
+            st.markdown(result_item, unsafe_allow_html=True)
 
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # 연결 종료
 conn.close()
