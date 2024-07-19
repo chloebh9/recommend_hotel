@@ -4,7 +4,9 @@ import pandas as pd
 import requests
 import json
 
-def get_information():
+def get_information(submit_json):
+  csv_file = "./data/cleaned_top_200_rows.csv"
+
   def get_img(keyword):
     base_url = "http://apis.data.go.kr/B551011/KorService1/searchKeyword1"
     api_key = os.getenv("DATA_API_KEY")   # .env 파일에 각자 API 추가
@@ -79,7 +81,7 @@ def get_information():
         
     return result
   
-  result = search_information(csv_file, ans_json)
+  result = search_information(csv_file, submit_json)
   return result
 
 if __name__ == "__main__":
