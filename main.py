@@ -5,8 +5,6 @@ import requests
 from PIL import Image
 from io import BytesIO
 from question_answer_chain import model
-from get_information import get_information
-from reply_json import get_json
 
 
 def show_details(user):
@@ -70,7 +68,7 @@ st.markdown(
         padding: 24px;
         gap: 12px;
         margin: 10px;
-        width: 480px;
+        width: 800px;
         height: 208px;
 
         background: #1E1E1F;
@@ -135,33 +133,32 @@ st.markdown('<div class="search-container">', unsafe_allow_html=True)
 search_term = st.text_input('', placeholder='다음과 같이 입력해 보세요! "바다가 보이는 호텔을 추천해줘."', key='search_input')
 data =''
 if search_term:
-    data = json.loads(get_json(search_term))
+    data = model(search_term)
 st.markdown('</div>', unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 
 with col1:
     if search_term:
-    # 예시로 숙박 정보를 가져오는 API 호출
-        #data = json.load(json_file)
-        # 결과 표시
+    # 쓰지 못하게 된 key값
+    #<p class="label">전화번호: {hotel["전화번호"]}</p>
+    # <p class="label">주소: {hotel["주소"]}</p>
+    # <p class="label">개요: {hotel["개요"][:24] + "...."}</p>
+    # <p class="label">객실 수: {hotel["객실 수"]}</p>
+    # <p class="label">부대 시설: {hotel["부대 시설"]}</p>
+    # <a href="{hotel["url"]}" class="top-right-btn" target="_blank">사이트 이동</a>
         st.markdown('<div class="search-results">', unsafe_allow_html=True)
-        for i, hotel in enumerate(data):
-            result_item = f'''
-                <div class="result-item">
-                    <h3 class="title">{hotel["명칭"]}</h3>
-                    <p class="label">전화번호: {hotel["전화번호"]}</p>
-                    <p class="label">주소: {hotel["주소"]}</p>
-                    <p class="label">개요: {hotel["개요"][:24] + "...."}</p>
-                    <p class="label">객실 수: {hotel["객실 수"]}</p>
-                    <p class="label">부대 시설: {hotel["부대 시설"]}</p>
-                    <a href="{hotel["url"]}" class="top-right-btn" target="_blank">사이트 이동</a>
-                    <a class="bottom-right-btn" target="_blank">상세 정보</a>
-                    <button class="bottom-right-btn">상세 정보</button>
-                </div>
-            '''
-            st.markdown(result_item, unsafe_allow_html=True)
+        hotel = data
+        result_item = f'''
+            <div class="result-item">
+                <h3 class="title">{hotel["hotel_id"][0]}</h3>
+                <p class="label">개요: {hotel["introduction"]}</p>
+                <a class="bottom-right-btn" target="_blank">상세 정보</a>
+                <button class="bottom-right-btn">상세 정보</button>
+            </div>
+        '''
+        st.markdown(result_item, unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # 연결 종료
 conn.close()
