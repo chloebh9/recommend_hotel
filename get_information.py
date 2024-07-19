@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 import pandas as pd
 import requests
 import json
@@ -5,7 +7,7 @@ import json
 def get_information():
   def get_img(keyword):
     base_url = "http://apis.data.go.kr/B551011/KorService1/searchKeyword1"
-    api_key = "NiNAJrycuLnyVCN1cxwXZqpFqZwOkg59Bm5RZUZo02oqy30EMrnKbvmH+Agcm4pKi+3qa3CSaWLuj+Z6kC1LoA=="
+    api_key = os.getenv("DATA_API_KEY")   # .env 파일에 각자 API 추가
 
     url = base_url
     params = {
@@ -81,8 +83,9 @@ def get_information():
   return result
 
 if __name__ == "__main__":
+  load_dotenv()  # 환경 변수 로드
   
-  csv_file = "/root/LLM_Bootcamp/exercise_3/cleaned_top_200_rows.csv"
+  csv_file = "/root/LLM_Bootcamp/Project3/cleaned_top_200_rows.csv"
   ans_json = '{"introduction" : "asdf", "hotel_id" : ["백년한옥", "엘리스호텔"]}' # 예시(json으로 받아온거)
 
   result = get_information()
@@ -92,4 +95,3 @@ if __name__ == "__main__":
   else:
       print("No matching hotel_id found.")
     
-
